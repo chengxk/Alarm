@@ -25,13 +25,15 @@ public class AlarmDao extends AbstractDao<Alarm, Long> {
     public static class Properties {
         public final static Property Id = new Property(0, Long.class, "id", true, "_id");
         public final static Property Name = new Property(1, String.class, "name", false, "NAME");
-        public final static Property RingPath = new Property(2, String.class, "ringPath", false, "RING_PATH");
-        public final static Property RingName = new Property(3, String.class, "ringName", false, "RING_NAME");
-        public final static Property RingType = new Property(4, Integer.class, "ringType", false, "RING_TYPE");
-        public final static Property RemindMode = new Property(5, Integer.class, "remindMode", false, "REMIND_MODE");
-        public final static Property Sleepy = new Property(6, Integer.class, "sleepy", false, "SLEEPY");
-        public final static Property CloseAlarmMode = new Property(7, Integer.class, "closeAlarmMode", false, "CLOSE_ALARM_MODE");
-        public final static Property AlarmCircle = new Property(8, byte[].class, "alarmCircle", false, "ALARM_CIRCLE");
+        public final static Property AlarmHour = new Property(2, Integer.class, "alarmHour", false, "ALARM_HOUR");
+        public final static Property AlarmMinute = new Property(3, Integer.class, "alarmMinute", false, "ALARM_MINUTE");
+        public final static Property RingPath = new Property(4, String.class, "ringPath", false, "RING_PATH");
+        public final static Property RingName = new Property(5, String.class, "ringName", false, "RING_NAME");
+        public final static Property RingType = new Property(6, Integer.class, "ringType", false, "RING_TYPE");
+        public final static Property RemindMode = new Property(7, Integer.class, "remindMode", false, "REMIND_MODE");
+        public final static Property Sleepy = new Property(8, Integer.class, "sleepy", false, "SLEEPY");
+        public final static Property CloseAlarmMode = new Property(9, Integer.class, "closeAlarmMode", false, "CLOSE_ALARM_MODE");
+        public final static Property AlarmCircle = new Property(10, byte[].class, "alarmCircle", false, "ALARM_CIRCLE");
     };
 
 
@@ -49,13 +51,15 @@ public class AlarmDao extends AbstractDao<Alarm, Long> {
         db.execSQL("CREATE TABLE " + constraint + "\"ALARM\" (" + //
                 "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: id
                 "\"NAME\" TEXT," + // 1: name
-                "\"RING_PATH\" TEXT," + // 2: ringPath
-                "\"RING_NAME\" TEXT," + // 3: ringName
-                "\"RING_TYPE\" INTEGER," + // 4: ringType
-                "\"REMIND_MODE\" INTEGER," + // 5: remindMode
-                "\"SLEEPY\" INTEGER," + // 6: sleepy
-                "\"CLOSE_ALARM_MODE\" INTEGER," + // 7: closeAlarmMode
-                "\"ALARM_CIRCLE\" BLOB);"); // 8: alarmCircle
+                "\"ALARM_HOUR\" INTEGER," + // 2: alarmHour
+                "\"ALARM_MINUTE\" INTEGER," + // 3: alarmMinute
+                "\"RING_PATH\" TEXT," + // 4: ringPath
+                "\"RING_NAME\" TEXT," + // 5: ringName
+                "\"RING_TYPE\" INTEGER," + // 6: ringType
+                "\"REMIND_MODE\" INTEGER," + // 7: remindMode
+                "\"SLEEPY\" INTEGER," + // 8: sleepy
+                "\"CLOSE_ALARM_MODE\" INTEGER," + // 9: closeAlarmMode
+                "\"ALARM_CIRCLE\" BLOB);"); // 10: alarmCircle
     }
 
     /** Drops the underlying database table. */
@@ -79,39 +83,49 @@ public class AlarmDao extends AbstractDao<Alarm, Long> {
             stmt.bindString(2, name);
         }
  
+        Integer alarmHour = entity.getAlarmHour();
+        if (alarmHour != null) {
+            stmt.bindLong(3, alarmHour);
+        }
+ 
+        Integer alarmMinute = entity.getAlarmMinute();
+        if (alarmMinute != null) {
+            stmt.bindLong(4, alarmMinute);
+        }
+ 
         String ringPath = entity.getRingPath();
         if (ringPath != null) {
-            stmt.bindString(3, ringPath);
+            stmt.bindString(5, ringPath);
         }
  
         String ringName = entity.getRingName();
         if (ringName != null) {
-            stmt.bindString(4, ringName);
+            stmt.bindString(6, ringName);
         }
  
         Integer ringType = entity.getRingType();
         if (ringType != null) {
-            stmt.bindLong(5, ringType);
+            stmt.bindLong(7, ringType);
         }
  
         Integer remindMode = entity.getRemindMode();
         if (remindMode != null) {
-            stmt.bindLong(6, remindMode);
+            stmt.bindLong(8, remindMode);
         }
  
         Integer sleepy = entity.getSleepy();
         if (sleepy != null) {
-            stmt.bindLong(7, sleepy);
+            stmt.bindLong(9, sleepy);
         }
  
         Integer closeAlarmMode = entity.getCloseAlarmMode();
         if (closeAlarmMode != null) {
-            stmt.bindLong(8, closeAlarmMode);
+            stmt.bindLong(10, closeAlarmMode);
         }
  
         byte[] alarmCircle = entity.getAlarmCircle();
         if (alarmCircle != null) {
-            stmt.bindBlob(9, alarmCircle);
+            stmt.bindBlob(11, alarmCircle);
         }
     }
 
@@ -127,13 +141,15 @@ public class AlarmDao extends AbstractDao<Alarm, Long> {
         Alarm entity = new Alarm( //
             cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0), // id
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // name
-            cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // ringPath
-            cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // ringName
-            cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4), // ringType
-            cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5), // remindMode
-            cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // sleepy
-            cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7), // closeAlarmMode
-            cursor.isNull(offset + 8) ? null : cursor.getBlob(offset + 8) // alarmCircle
+            cursor.isNull(offset + 2) ? null : cursor.getInt(offset + 2), // alarmHour
+            cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3), // alarmMinute
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // ringPath
+            cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // ringName
+            cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6), // ringType
+            cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7), // remindMode
+            cursor.isNull(offset + 8) ? null : cursor.getInt(offset + 8), // sleepy
+            cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9), // closeAlarmMode
+            cursor.isNull(offset + 10) ? null : cursor.getBlob(offset + 10) // alarmCircle
         );
         return entity;
     }
@@ -143,13 +159,15 @@ public class AlarmDao extends AbstractDao<Alarm, Long> {
     public void readEntity(Cursor cursor, Alarm entity, int offset) {
         entity.setId(cursor.isNull(offset + 0) ? null : cursor.getLong(offset + 0));
         entity.setName(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
-        entity.setRingPath(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
-        entity.setRingName(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
-        entity.setRingType(cursor.isNull(offset + 4) ? null : cursor.getInt(offset + 4));
-        entity.setRemindMode(cursor.isNull(offset + 5) ? null : cursor.getInt(offset + 5));
-        entity.setSleepy(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
-        entity.setCloseAlarmMode(cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7));
-        entity.setAlarmCircle(cursor.isNull(offset + 8) ? null : cursor.getBlob(offset + 8));
+        entity.setAlarmHour(cursor.isNull(offset + 2) ? null : cursor.getInt(offset + 2));
+        entity.setAlarmMinute(cursor.isNull(offset + 3) ? null : cursor.getInt(offset + 3));
+        entity.setRingPath(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
+        entity.setRingName(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
+        entity.setRingType(cursor.isNull(offset + 6) ? null : cursor.getInt(offset + 6));
+        entity.setRemindMode(cursor.isNull(offset + 7) ? null : cursor.getInt(offset + 7));
+        entity.setSleepy(cursor.isNull(offset + 8) ? null : cursor.getInt(offset + 8));
+        entity.setCloseAlarmMode(cursor.isNull(offset + 9) ? null : cursor.getInt(offset + 9));
+        entity.setAlarmCircle(cursor.isNull(offset + 10) ? null : cursor.getBlob(offset + 10));
      }
     
     /** @inheritdoc */

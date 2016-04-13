@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import com.mumu.alarm.Constants;
 import com.mumu.alarm.R;
 import com.mumu.alarm.adapter.SetAlarmAdapter;
 import com.mumu.alarm.bean.Alarm;
+import com.mumu.alarm.utils.TimeUtils;
 
 import butterknife.Bind;
 
@@ -50,6 +52,7 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
     //dialog的view
     private EditText editText;
     private ListView singleChoiceListView;
+    private LinearLayout remindCircleLayout;
     private TextView dialogTitle;
     private TextView confirm;
     private TextView cancle;
@@ -77,6 +80,8 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
         if (intent.hasExtra("alarm")) {
             activityType = EDIT_ALARM_TYPE;
             alarm = (Alarm) intent.getSerializableExtra("alarm");
+            timePicker.setCurrentHour(alarm.getAlarmHour());
+            timePicker.setCurrentMinute(alarm.getAlarmMinute());
         } else {
             activityType = ADD_ALARM_TYPE;
             alarm = new Alarm();
@@ -86,6 +91,8 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
             alarm.setRingPath(Constants.DEFAULT_ALARM_PATH);
             alarm.setRingType(Constants.ASSERTS_RING_TYPE);
             alarm.setRemindMode(Constants.ALARM_REMIND_RING);
+            alarm.setAlarmHour(timePicker.getCurrentHour());
+            alarm.setAlarmMinute(timePicker.getCurrentMinute());
             alarm.setCloseAlarmMode(0);
             alarm.setAlarmCircle(new byte[]{0, 1, 1, 1, 1, 1, 0});
 
@@ -96,11 +103,15 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
         listView.setAdapter(setAlarmAdapter);
         Integer currentHour = timePicker.getCurrentHour();
         Integer currentMinute = timePicker.getCurrentMinute();
-        formatTime(currentHour, currentMinute);
+
+        timeInfo.setText(TimeUtils.formatTime(currentHour, currentMinute));
         timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
             @Override
             public void onTimeChanged(TimePicker timePicker, int i, int i1) {
-                formatTime(i, i1);
+                alarm.setAlarmHour(i);
+                alarm.setAlarmMinute(i1);
+                App.getApp().getDaoSession().getAlarmDao().insertOrReplace(alarm);
+                timeInfo.setText(TimeUtils.formatTime(i, i1));
             }
         });
 
@@ -138,19 +149,7 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
         setAlarmAdapter.setData(alarm);
     }
 
-    private void formatTime(int i, int i1) {
-        if (i < 10) {
-            timeInfo.setText("0" + i + ":");
-        } else {
-            timeInfo.setText(i + ":");
-        }
 
-        if (i1 < 10) {
-            timeInfo.append("0" + i1);
-        } else {
-            timeInfo.append("" + i1);
-        }
-    }
 
     /**
      * 显示不同的dialog
@@ -168,6 +167,7 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
             alertDialog.setView(dialogRoot);
             editText = (EditText) dialogRoot.findViewById(R.id.dialog_edit_name);
             singleChoiceListView = (ListView) dialogRoot.findViewById(R.id.dialog_list_view);
+            remindCircleLayout = (LinearLayout) dialogRoot.findViewById(R.id.dialog_remind_circle_layout);
             dialogTitle = (TextView) dialogRoot.findViewById(R.id.dialog_title);
             confirm = (TextView) dialogRoot.findViewById(R.id.dialog_confirm);
             cancle = (TextView) dialogRoot.findViewById(R.id.dialog_cancle);
@@ -178,14 +178,17 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
         if (type == EDIT_ALARM_NAME) {//闹钟名称
             editText.setVisibility(View.VISIBLE);
             singleChoiceListView.setVisibility(View.GONE);
+            remindCircleLayout.setVisibility(View.GONE);
             dialogTitle.setText("闹钟名称");
         } else if (type == EDIT_ALARM_CIRLCE) {//闹钟周期
             editText.setVisibility(View.GONE);
-            singleChoiceListView.setVisibility(View.VISIBLE);
+            singleChoiceListView.setVisibility(View.GONE);
+            remindCircleLayout.setVisibility(View.VISIBLE);
             dialogTitle.setText("闹钟周期");
         } else if (type == EDIT_ALARM_REMIND) {//提醒方式
             editText.setVisibility(View.GONE);
             singleChoiceListView.setVisibility(View.VISIBLE);
+            remindCircleLayout.setVisibility(View.GONE);
             dialogTitle.setText("提醒方式");
             singleChoiceListView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_single_choice, remindModeArray));
 
@@ -199,8 +202,9 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
             }
 
         } else if (type == EDIT_ALARM_SLEEPY) {//贪睡
-            editText.setVisibility(View.GONE);
             dialogTitle.setText("贪睡");
+            editText.setVisibility(View.GONE);
+            remindCircleLayout.setVisibility(View.GONE);
             singleChoiceListView.setVisibility(View.VISIBLE);
             singleChoiceListView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_single_choice, sleepyArray));
             int index = 0;
@@ -235,6 +239,12 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
     @Override
     protected int getLayoutId() {
         return R.layout.activity_set_alarm;
+    }
+
+
+    @Override
+    protected String getTitleContent() {
+        return "编辑闹钟";
     }
 
     @Override

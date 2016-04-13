@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.mumu.alarm.Constants;
 import com.mumu.alarm.R;
 import com.mumu.alarm.bean.Alarm;
+import com.mumu.alarm.utils.TimeUtils;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -62,30 +63,8 @@ public class SetAlarmAdapter extends BaseAdapter {
                 holder.description.setText(alarm.getName());
                 break;
             case 1:
-                StringBuilder builder = new StringBuilder();
                 byte[] flags = alarm.getAlarmCircle();
-                if (flags != null) {
-                    for (int index = 0; index < flags.length; index++) {
-                        if (flags[index] == 1) {
-                            if (index == 0) {
-                                builder.append("周日 ");
-                            } else if (index == 1) {
-                                builder.append("周一 ");
-                            } else if (index == 2) {
-                                builder.append("周二 ");
-                            } else if (index == 3) {
-                                builder.append("周三 ");
-                            } else if (index == 4) {
-                                builder.append("周四 ");
-                            } else if (index == 5) {
-                                builder.append("周五 ");
-                            } else {
-                                builder.append("周六");
-                            }
-                        }
-                    }
-                }
-                holder.description.setText(builder.toString());
+                holder.description.setText(TimeUtils.formatRemindCircle(flags));
                 break;
             case 2:
                 int remindMode = alarm.getRemindMode();
@@ -109,6 +88,8 @@ public class SetAlarmAdapter extends BaseAdapter {
         holder.title.setText(arr[position]);
         return view;
     }
+
+
 
     @Override
     public boolean isEnabled(int position) {

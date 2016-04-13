@@ -8,6 +8,8 @@ public class Alarm implements java.io.Serializable {
 
     private Long id;
     private String name;
+    private Integer alarmHour;
+    private Integer alarmMinute;
     private String ringPath;
     private String ringName;
     private Integer ringType;
@@ -23,9 +25,11 @@ public class Alarm implements java.io.Serializable {
         this.id = id;
     }
 
-    public Alarm(Long id, String name, String ringPath, String ringName, Integer ringType, Integer remindMode, Integer sleepy, Integer closeAlarmMode, byte[] alarmCircle) {
+    public Alarm(Long id, String name, Integer alarmHour, Integer alarmMinute, String ringPath, String ringName, Integer ringType, Integer remindMode, Integer sleepy, Integer closeAlarmMode, byte[] alarmCircle) {
         this.id = id;
         this.name = name;
+        this.alarmHour = alarmHour;
+        this.alarmMinute = alarmMinute;
         this.ringPath = ringPath;
         this.ringName = ringName;
         this.ringType = ringType;
@@ -49,6 +53,22 @@ public class Alarm implements java.io.Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Integer getAlarmHour() {
+        return alarmHour;
+    }
+
+    public void setAlarmHour(Integer alarmHour) {
+        this.alarmHour = alarmHour;
+    }
+
+    public Integer getAlarmMinute() {
+        return alarmMinute;
+    }
+
+    public void setAlarmMinute(Integer alarmMinute) {
+        this.alarmMinute = alarmMinute;
     }
 
     public String getRingPath() {

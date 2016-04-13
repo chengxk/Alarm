@@ -40,6 +40,8 @@ public class BeanGenerator {
         alarm.implementsSerializable();
         alarm.addIdProperty().primaryKey().autoincrement();
         alarm.addStringProperty("name");
+        alarm.addIntProperty("alarmHour");
+        alarm.addIntProperty("alarmMinute");
         alarm.addStringProperty("ringPath");
         alarm.addStringProperty("ringName");
         alarm.addIntProperty("ringType");

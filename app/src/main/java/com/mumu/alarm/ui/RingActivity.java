@@ -52,4 +52,8 @@ public class RingActivity extends BaseActivity {
         return R.layout.activity_ring;
     }
 
+    @Override
+    protected String getTitleContent() {
+        return "铃声设置";
+    }
 }

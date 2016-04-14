@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mumu.alarm.R;
+import com.umeng.analytics.MobclickAgent;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -31,15 +32,28 @@ public abstract class BaseActivity extends AppCompatActivity {
         setContentView(getLayoutId());
         ButterKnife.bind(this);
 
-        titleLeft.setVisibility(isLeftVisible()? View.VISIBLE : View.GONE);
-        titleRight.setVisibility(isRightVisible()? View.VISIBLE : View.GONE);
+        titleLeft.setVisibility(isLeftVisible() ? View.VISIBLE : View.GONE);
+        titleRight.setVisibility(isRightVisible() ? View.VISIBLE : View.GONE);
         titleText.setText(getTitleContent());
+        titleRight.setText(getRightTitleContent());
         titleLeft.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 finish();
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);
     }
 
     @Override
@@ -50,25 +64,33 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     /**
      * 标题栏左边的返回按钮是否显示
+     *
      * @return
      */
-    protected boolean isLeftVisible(){
+    protected boolean isLeftVisible() {
         return true;
     }
 
     /**
      * 获取标题内容
+     *
      * @return
      */
-    protected String getTitleContent(){
-        return  getResources().getString(R.string.app_name);
+    protected String getTitleContent() {
+        return getResources().getString(R.string.app_name);
+    }
+
+
+    protected String getRightTitleContent() {
+        return getResources().getString(R.string.action_settings);
     }
 
     /**
      * 标题栏右边的文字是否显示
+     *
      * @return
      */
-    protected boolean isRightVisible(){
+    protected boolean isRightVisible() {
         return false;
     }
 

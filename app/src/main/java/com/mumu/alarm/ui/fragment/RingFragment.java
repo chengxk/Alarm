@@ -36,7 +36,7 @@ import butterknife.ButterKnife;
  * Use the {@link RingFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RingFragment extends Fragment {
+public class RingFragment extends BaseFragment {
 
     @Bind(R.id.ring_list_view)
     ListView listView;
@@ -68,10 +68,12 @@ public class RingFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_system_ring, container, false);
-        ButterKnife.bind(this, view);
+    protected int getFragmentLayoutId() {
+        return R.layout.fragment_system_ring;
+    }
+
+    @Override
+    protected void fillData() {
         boolean flag = type == Constants.USER_RING_TYPE ? loadUserRingData() : loadSystemRingData();
         if (flag) {
             final List<Ring> ringList = type == Constants.USER_RING_TYPE ? App.getApp().getUserRingList() : App.getApp().getRingList();
@@ -94,9 +96,17 @@ public class RingFragment extends Fragment {
                     int length = ringList.size();
                     for (int i = 0; i < length; i++) {
                         Ring ring = ringList.get(i);
-                        if (alarm.getRingName().equals(ring.getName())) {
+                        if (alarm.getRingPath().equals(ring.getPath())) {
                             listView.setItemChecked(i, true);
                         }
+                    }
+                }
+            } else {
+                int length = ringList.size();
+                for (int i = 0; i < length; i++) {
+                    Ring ring = ringList.get(i);
+                    if (alarm.getRingPath().equals(ring.getPath())) {
+                        listView.setItemChecked(i, true);
                     }
                 }
             }
@@ -111,15 +121,13 @@ public class RingFragment extends Fragment {
                 alarm.setRingName(ring.getName());
                 alarm.setRingPath(ring.getPath());
                 alarm.setRingType(ring.getType());
-                App.getApp().getDaoSession().getAlarmDao().insertOrReplace(alarm);
-
                 if (listener != null) {
-                    listener.onNotifyRingSelected(i, type);
+                    listener.onNotifyRingSelected(i, type, ring);
                 }
                 play(ring);
             }
         });
-        return view;
+
     }
 
     @Override
@@ -129,14 +137,6 @@ public class RingFragment extends Fragment {
             listener = (NotifyRingSelectedListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + "must implement NotifyRingSelectedListener");
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
         }
     }
 
@@ -206,6 +206,12 @@ public class RingFragment extends Fragment {
         return false;
     }
 
+    public void cancleItemChecked() {
+        listView.setItemChecked(listView.getCheckedItemPosition(), false);
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
+    }
 
     private void play(Ring ring) {
         if (mediaPlayer == null) {
@@ -234,7 +240,6 @@ public class RingFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.unbind(this);
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
@@ -242,6 +247,6 @@ public class RingFragment extends Fragment {
     }
 
     public interface NotifyRingSelectedListener {
-        void onNotifyRingSelected(int position, int type);
+        void onNotifyRingSelected(int position, int type, Ring ring);
     }
 }

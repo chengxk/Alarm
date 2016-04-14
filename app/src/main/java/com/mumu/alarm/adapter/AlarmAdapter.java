@@ -32,6 +32,11 @@ public class AlarmAdapter extends BaseAdapter {
         inflater = LayoutInflater.from(context);
     }
 
+    public void setData(List<Alarm> list){
+        this.list = list;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() {
         return list.size();

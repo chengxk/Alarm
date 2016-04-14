@@ -22,6 +22,7 @@ import com.mumu.alarm.Constants;
 import com.mumu.alarm.R;
 import com.mumu.alarm.adapter.SetAlarmAdapter;
 import com.mumu.alarm.bean.Alarm;
+import com.mumu.alarm.bean.Ring;
 import com.mumu.alarm.ui.widget.CircleTextView;
 import com.mumu.alarm.utils.TimeUtils;
 
@@ -42,6 +43,9 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
     public static final int EDIT_ALARM_REMIND = 0x102;
     public static final int EDIT_ALARM_RING = 0x103;
     public static final int EDIT_ALARM_SLEEPY = 0x104;
+
+
+    public static final int REQUEST_RING_CODE = 0x105;
 
 
     @Bind(R.id.set_alarm_time_info)
@@ -99,7 +103,6 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
             alarm.setCloseAlarmMode(0);
             alarm.setAlarmCircle(new byte[]{0, 1, 1, 1, 1, 1, 0});
 
-            App.getApp().getDaoSession().getAlarmDao().insertOrReplace(alarm);
         }
 
         setAlarmAdapter = new SetAlarmAdapter(this, alarm);
@@ -113,7 +116,6 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
             public void onTimeChanged(TimePicker timePicker, int i, int i1) {
                 alarm.setAlarmHour(i);
                 alarm.setAlarmMinute(i1);
-                App.getApp().getDaoSession().getAlarmDao().insertOrReplace(alarm);
                 timeInfo.setText(TimeUtils.formatTime(i, i1));
             }
         });
@@ -135,23 +137,30 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
                     type = EDIT_ALARM_RING;
                     Intent intent1 = new Intent(SetAlarmActivity.this, RingActivity.class);
                     intent1.putExtra("alarm", alarm);
-                    startActivity(intent1);
+                    startActivityForResult(intent1, REQUEST_RING_CODE);
                 } else if (i == 4) {
                     type = EDIT_ALARM_SLEEPY;
                     showCustomDialog(EDIT_ALARM_SLEEPY);
                 }
             }
         });
+
+        titleRight.setOnClickListener(this);
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        long id = alarm.getId();
-        alarm = App.getApp().getDaoSession().getAlarmDao().load(id);
-        setAlarmAdapter.setData(alarm);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_RING_CODE) {
+                Ring ring = (Ring) data.getSerializableExtra("ring");
+                alarm.setRingName(ring.getName());
+                alarm.setRingPath(ring.getPath());
+                alarm.setRingType(ring.getType());
+                setAlarmAdapter.notifyDataSetChanged();
+            }
+        }
     }
-
 
     /**
      * 显示不同的dialog
@@ -269,6 +278,17 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
         return "编辑闹钟";
     }
 
+
+    @Override
+    protected String getRightTitleContent() {
+        return "完成";
+    }
+
+    @Override
+    protected boolean isRightVisible() {
+        return true;
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -281,6 +301,10 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.title_right:
+                App.getApp().getDaoSession().getAlarmDao().insertOrReplace(alarm);
+                finish();
+                break;
             case R.id.dialog_confirm:
                 int position = singleChoiceListView.getCheckedItemPosition();
                 switch (type) {
@@ -322,7 +346,6 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
                     default:
                         break;
                 }
-                App.getApp().getDaoSession().getAlarmDao().insertOrReplace(alarm);
                 setAlarmAdapter.notifyDataSetChanged();
                 alertDialog.dismiss();
                 break;

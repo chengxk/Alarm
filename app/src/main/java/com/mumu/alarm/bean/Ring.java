@@ -1,9 +1,11 @@
 package com.mumu.alarm.bean;
 
+import java.io.Serializable;
+
 /**
  * Created by acer on 2016/4/12.
  */
-public class Ring {
+public class Ring implements Serializable{
     private String name;
     private String path;
     private int type;

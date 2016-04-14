@@ -15,3 +15,35 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+-keepclassmembers class * {
+    public <init>(org.json.JSONObject);
+}
+
+#把[您的应用包名] 替换成您自己的包名，如"com.example.R$*"。
+-keep public class *.R$*{
+    public static final int *;
+}
+
+-dontwarn okio.**
+-dontwarn com.squareup.wire.**
+-keep class okio.** {*;}
+-keep class com.squareup.wire.** {*;}
+
+-keep class butterknife.** { *; }
+-dontwarn butterknife.internal.**
+-keep class **$$ViewBinder { *; }
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <fields>;
+}
+
+-keepclasseswithmembernames class * {
+    @butterknife.* <methods>;
+}
+

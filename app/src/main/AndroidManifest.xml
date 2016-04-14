@@ -2,6 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mumu.alarm">
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -21,8 +27,30 @@
         <activity android:name=".ui.SetAlarmActivity" />
         <activity
             android:name=".ui.RingActivity"
-            android:label="@string/title_activity_ring"
-            ></activity>
+            android:label="@string/title_activity_ring" />
+        <activity android:name=".ui.SettingsActivity" />
+
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="570f27dce0f55abbc5000eb0" />
+        <meta-data
+            android:name="UMENG_CHANNEL"
+            android:value="Channel ID" />
+
+        <activity android:name=".ui.AboutActivity" />
+        <activity android:name=".ui.HelpActivity"></activity>
+
+        <!--友盟更新-->
+        <service
+            android:name="com.umeng.update.net.DownloadingService"
+            android:process=":DownloadingService"></service>
+        <activity
+            android:name="com.umeng.update.UpdateDialogActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"></activity>
+
+        <!--用户反馈-->
+        <activity
+            android:name="com.umeng.fb.ConversationActivity"/>
     </application>
 
 </manifest>

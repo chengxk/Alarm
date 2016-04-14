@@ -2,7 +2,7 @@
     <string name="app_name">闹钟</string>
     <string name="action_settings">设置</string>
 
-
+    <string name="about">%1$s 是一款简单，实用，占用内存极低的应用工具。把握好生命的每时每刻，让你的生活不再有遗憾。算了，不编了，编不下去了。</string>
     <string-array name="set_alarm_array">
         <item>闹钟名称</item>
         <item>闹钟周期</item>

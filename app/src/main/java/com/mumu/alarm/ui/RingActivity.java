@@ -1,14 +1,17 @@
 package com.mumu.alarm.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.view.View;
 
 import com.mumu.alarm.Constants;
 import com.mumu.alarm.R;
 import com.mumu.alarm.adapter.FragmentsAdapter;
 import com.mumu.alarm.bean.Alarm;
+import com.mumu.alarm.bean.Ring;
 import com.mumu.alarm.ui.fragment.RingFragment;
 
 import java.util.ArrayList;
@@ -23,9 +26,10 @@ public class RingActivity extends BaseActivity implements RingFragment.NotifyRin
     @Bind(R.id.ring_view_pager)
     ViewPager viewPager;
 
-    Fragment systemFragment;
-    Fragment userRingFragment;
+    RingFragment systemFragment;
+    RingFragment userRingFragment;
 
+    private Ring ring;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +48,23 @@ public class RingActivity extends BaseActivity implements RingFragment.NotifyRin
         viewPager.setAdapter(adapter);
         tabLayout.setupWithViewPager(viewPager);
 
+        titleLeft.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(ring != null){
+                    setResult(RESULT_OK , new Intent().putExtra("ring" , ring));
+                }
+                finish();
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(ring != null){
+            setResult(RESULT_OK , new Intent().putExtra("ring" , ring));
+        }
+        finish();
     }
 
     @Override
@@ -57,11 +78,12 @@ public class RingActivity extends BaseActivity implements RingFragment.NotifyRin
     }
 
     @Override
-    public void onNotifyRingSelected(int position, int type) {
+    public void onNotifyRingSelected(int position, int type , Ring ring) {
+        this.ring = ring;
         if (type == Constants.USER_RING_TYPE) {//用户操作本地铃声时触发
-
+            systemFragment.cancleItemChecked();
         } else {
-
+            userRingFragment.cancleItemChecked();
         }
     }
 }

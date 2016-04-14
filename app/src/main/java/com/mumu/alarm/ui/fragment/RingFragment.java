@@ -1,12 +1,14 @@
 package com.mumu.alarm.ui.fragment;
 
+import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
+import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,22 +33,26 @@ import butterknife.ButterKnife;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link SystemRingFragment#newInstance} factory method to
+ * Use the {@link RingFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SystemRingFragment extends Fragment {
+public class RingFragment extends Fragment {
 
     @Bind(R.id.ring_list_view)
     ListView listView;
 
     private MediaPlayer mediaPlayer;
     private Alarm alarm;
+    private int type;
+
+    private NotifyRingSelectedListener listener;
 
     // TODO: Rename and change types and number of parameters
-    public static SystemRingFragment newInstance(Alarm alarm) {
-        SystemRingFragment fragment = new SystemRingFragment();
+    public static RingFragment newInstance(Alarm alarm, int type) {
+        RingFragment fragment = new RingFragment();
         Bundle args = new Bundle();
         args.putSerializable("alarm", alarm);
+        args.putInt("type", type);
         fragment.setArguments(args);
         return fragment;
     }
@@ -57,6 +63,7 @@ public class SystemRingFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             alarm = (Alarm) args.getSerializable("alarm");
+            type = args.getInt("type");
         }
     }
 
@@ -65,9 +72,9 @@ public class SystemRingFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_system_ring, container, false);
         ButterKnife.bind(this, view);
-        boolean flag = loadSystemRingData();
+        boolean flag = type == Constants.USER_RING_TYPE ? loadUserRingData() : loadSystemRingData();
         if (flag) {
-            final List<Ring> ringList = App.getApp().getRingList();
+            final List<Ring> ringList = type == Constants.USER_RING_TYPE ? App.getApp().getUserRingList() : App.getApp().getRingList();
             listView.setAdapter(new ArrayAdapter<Ring>(getContext(), android.R.layout.simple_list_item_single_choice, ringList) {
                 @Override
                 public View getView(int position, View convertView, ViewGroup parent) {
@@ -80,14 +87,16 @@ public class SystemRingFragment extends Fragment {
             });
             listView.setChoiceMode(listView.CHOICE_MODE_SINGLE);
 
-            if(alarm.getRingType() == Constants.ASSERTS_RING_TYPE){
-                listView.setItemChecked(0 , true);
-            }else if(alarm.getRingType() == Constants.SYSTEM_RING_TYPE){
-                int length = ringList.size();
-                for(int i = 0 ; i < length;i++){
-                    Ring ring = ringList.get(i);
-                    if(alarm.getRingName().equals(ring.getName())){
-                        listView.setItemChecked(i , true);
+            if (type != Constants.USER_RING_TYPE) {
+                if (alarm.getRingType() == Constants.ASSERTS_RING_TYPE) {
+                    listView.setItemChecked(0, true);
+                } else if (alarm.getRingType() == Constants.SYSTEM_RING_TYPE) {
+                    int length = ringList.size();
+                    for (int i = 0; i < length; i++) {
+                        Ring ring = ringList.get(i);
+                        if (alarm.getRingName().equals(ring.getName())) {
+                            listView.setItemChecked(i, true);
+                        }
                     }
                 }
             }
@@ -103,10 +112,24 @@ public class SystemRingFragment extends Fragment {
                 alarm.setRingPath(ring.getPath());
                 alarm.setRingType(ring.getType());
                 App.getApp().getDaoSession().getAlarmDao().insertOrReplace(alarm);
+
+                if (listener != null) {
+                    listener.onNotifyRingSelected(i, type);
+                }
                 play(ring);
             }
         });
         return view;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            listener = (NotifyRingSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + "must implement NotifyRingSelectedListener");
+        }
     }
 
     @Override
@@ -115,6 +138,36 @@ public class SystemRingFragment extends Fragment {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
         }
+    }
+
+    private boolean loadUserRingData() {
+        List<Ring> userRingList = App.getApp().getUserRingList();
+        if (userRingList.isEmpty()) {
+            Cursor cursor = getContext().getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    null, null,
+                    null, null);
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    String path = cursor
+                            .getString(cursor
+                                    .getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                    String displayName = cursor
+                            .getString(cursor
+                                    .getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME));
+
+                    Ring ring = new Ring();
+                    ring.setType(Constants.USER_RING_TYPE);
+                    ring.setPath(path);
+                    ring.setName(displayName);
+                    userRingList.add(ring);
+                }
+                cursor.close();
+                return true;
+            }
+        } else {
+            return true;
+        }
+        return false;
     }
 
     private boolean loadSystemRingData() {
@@ -186,5 +239,9 @@ public class SystemRingFragment extends Fragment {
             mediaPlayer.release();
             mediaPlayer = null;
         }
+    }
+
+    public interface NotifyRingSelectedListener {
+        void onNotifyRingSelected(int position, int type);
     }
 }

@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.mumu.alarm.ui.fragment.SystemRingFragment">
+    tools:context=".ui.fragment.RingFragment">
 
     <ListView
         android:id="@+id/ring_list_view"

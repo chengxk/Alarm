@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckedTextView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -21,6 +22,7 @@ import com.mumu.alarm.Constants;
 import com.mumu.alarm.R;
 import com.mumu.alarm.adapter.SetAlarmAdapter;
 import com.mumu.alarm.bean.Alarm;
+import com.mumu.alarm.ui.widget.CircleTextView;
 import com.mumu.alarm.utils.TimeUtils;
 
 import butterknife.Bind;
@@ -57,6 +59,7 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
     private TextView confirm;
     private TextView cancle;
 
+    private CircleTextView zero, one, two, three, four, five, six;
 
     private Alarm alarm;
     private AlertDialog alertDialog;
@@ -150,7 +153,6 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
     }
 
 
-
     /**
      * 显示不同的dialog
      * 0=编辑闹钟名称，1=闹钟周期，2=提醒方式，4=贪睡
@@ -168,11 +170,21 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
             editText = (EditText) dialogRoot.findViewById(R.id.dialog_edit_name);
             singleChoiceListView = (ListView) dialogRoot.findViewById(R.id.dialog_list_view);
             remindCircleLayout = (LinearLayout) dialogRoot.findViewById(R.id.dialog_remind_circle_layout);
+
+            zero = (CircleTextView) dialogRoot.findViewById(R.id.dialog_remind_circle_zero);
+            one = (CircleTextView) dialogRoot.findViewById(R.id.dialog_remind_circle_one);
+            two = (CircleTextView) dialogRoot.findViewById(R.id.dialog_remind_circle_two);
+            three = (CircleTextView) dialogRoot.findViewById(R.id.dialog_remind_circle_three);
+            four = (CircleTextView) dialogRoot.findViewById(R.id.dialog_remind_circle_four);
+            five = (CircleTextView) dialogRoot.findViewById(R.id.dialog_remind_circle_five);
+            six = (CircleTextView) dialogRoot.findViewById(R.id.dialog_remind_circle_six);
+
             dialogTitle = (TextView) dialogRoot.findViewById(R.id.dialog_title);
             confirm = (TextView) dialogRoot.findViewById(R.id.dialog_confirm);
             cancle = (TextView) dialogRoot.findViewById(R.id.dialog_cancle);
             confirm.setOnClickListener(this);
             cancle.setOnClickListener(this);
+
         }
 
         if (type == EDIT_ALARM_NAME) {//闹钟名称
@@ -184,6 +196,16 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
             editText.setVisibility(View.GONE);
             singleChoiceListView.setVisibility(View.GONE);
             remindCircleLayout.setVisibility(View.VISIBLE);
+
+            byte[] circle = alarm.getAlarmCircle();
+            zero.setChecked(circle[0] == 1 ? true : false);
+            one.setChecked(circle[1] == 1 ? true : false);
+            two.setChecked(circle[2] == 1 ? true : false);
+            three.setChecked(circle[3] == 1 ? true : false);
+            four.setChecked(circle[4] == 1 ? true : false);
+            five.setChecked(circle[5] == 1 ? true : false);
+            six.setChecked(circle[6] == 1 ? true : false);
+
             dialogTitle.setText("闹钟周期");
         } else if (type == EDIT_ALARM_REMIND) {//提醒方式
             editText.setVisibility(View.GONE);
@@ -193,12 +215,12 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
             singleChoiceListView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_single_choice, remindModeArray));
 
             Integer remindMode = alarm.getRemindMode();
-            if(remindMode == Constants.ALARM_REMIND_RING){
-                singleChoiceListView.setItemChecked(0 , true);
-            }else if(remindMode == Constants.ALARM_REMIND_VIBRATE){
-                singleChoiceListView.setItemChecked(1 , true);
-            }else{
-                singleChoiceListView.setItemChecked(3 , true);
+            if (remindMode == Constants.ALARM_REMIND_RING) {
+                singleChoiceListView.setItemChecked(0, true);
+            } else if (remindMode == Constants.ALARM_REMIND_VIBRATE) {
+                singleChoiceListView.setItemChecked(1, true);
+            } else {
+                singleChoiceListView.setItemChecked(3, true);
             }
 
         } else if (type == EDIT_ALARM_SLEEPY) {//贪睡
@@ -271,13 +293,22 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
                         }
                         break;
                     case EDIT_ALARM_CIRLCE:
+                        byte[] circle = new byte[7];
+                        circle[0] = (byte) (zero.isChecked() ? 1 : 0);
+                        circle[1] = (byte) (one.isChecked() ? 1 : 0);
+                        circle[2] = (byte) (two.isChecked() ? 1 : 0);
+                        circle[3] = (byte) (three.isChecked() ? 1 : 0);
+                        circle[4] = (byte) (four.isChecked() ? 1 : 0);
+                        circle[5] = (byte) (five.isChecked() ? 1 : 0);
+                        circle[6] = (byte) (six.isChecked() ? 1 : 0);
+                        alarm.setAlarmCircle(circle);
                         break;
                     case EDIT_ALARM_REMIND:
-                        if(position==0){
+                        if (position == 0) {
                             alarm.setRemindMode(Constants.ALARM_REMIND_RING);
-                        }else if(position ==1){
+                        } else if (position == 1) {
                             alarm.setRemindMode(Constants.ALARM_REMIND_VIBRATE);
-                        }else{
+                        } else {
                             alarm.setRemindMode(Constants.ALARM_REMIND_RING_VIBRATE);
                         }
                         setAlarmAdapter.notifyDataSetChanged();
@@ -298,6 +329,7 @@ public class SetAlarmActivity extends BaseActivity implements View.OnClickListen
             case R.id.dialog_cancle:
                 alertDialog.dismiss();
                 break;
+
         }
     }
 }

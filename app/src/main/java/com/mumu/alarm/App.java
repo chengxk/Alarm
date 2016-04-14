@@ -20,6 +20,7 @@ public class App extends Application {
     private static App app;
 
     private List<Ring> ringList = new ArrayList<>();
+    private List<Ring> userRingList = new ArrayList<>();
 
     @Override
     public void onCreate() {
@@ -46,5 +47,9 @@ public class App extends Application {
 
     public List<Ring> getRingList() {
         return ringList;
+    }
+
+    public List<Ring> getUserRingList() {
+        return userRingList;
     }
 }
